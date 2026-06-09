@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bfn5cfr20tyii"]
+
+[ext_resource type="Script" uid="uid://3wqtmbe8agvc" path="res://main.gd" id="1_ig7tw"]
+
+[sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_0xm2m"]
+
+[node name="Main" type="Node" unique_id=1751329049]
+script = ExtResource("1_ig7tw")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1288467077]
+stream = SubResource("AudioStreamMicrophone_0xm2m")
+autoplay = true
+bus = &"Record"
