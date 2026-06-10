@@ -1,13 +1,64 @@
 [gd_scene format=3 uid="uid://bfn5cfr20tyii"]
 
 [ext_resource type="Script" uid="uid://3wqtmbe8agvc" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://briw64te4xd7s" path="res://stt_manager.gd" id="2_1bvp3"]
+[ext_resource type="Script" uid="uid://bony80fljgjf0" path="res://ring_manager.gd" id="2_272bh"]
+[ext_resource type="Script" uid="uid://deiheki748r14" path="res://llm_manager.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://fj55kf3hitrv" path="res://tts_manager.gd" id="4_7mycd"]
+[ext_resource type="Shader" uid="uid://hgqfw06thfw4" path="res://aura.gdshader" id="5_7mycd"]
+[ext_resource type="Script" uid="uid://c1ufjd6qb2mwg" path="res://aura_controller.gd" id="6_272bh"]
 
 [sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_0xm2m"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5vw27"]
+shader = ExtResource("5_7mycd")
+shader_parameter/volume = 0.0
+shader_parameter/state = 0
+shader_parameter/time_offset = 0.0
+
+[sub_resource type="Environment" id="Environment_272bh"]
+background_mode = 1
+glow_enabled = true
+glow_intensity = 1.5
+glow_blend_mode = 0
 
 [node name="Main" type="Node" unique_id=1751329049]
 script = ExtResource("1_ig7tw")
 
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1288467077]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1288467077]
 stream = SubResource("AudioStreamMicrophone_0xm2m")
 autoplay = true
 bus = &"Record"
+
+[node name="RingManager" type="Node" parent="." unique_id=986854461]
+script = ExtResource("2_272bh")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1731879902]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Aura" type="ColorRect" parent="." unique_id=1363668735]
+material = SubResource("ShaderMaterial_5vw27")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+script = ExtResource("6_272bh")
+
+[node name="STTManager" type="Node" parent="." unique_id=290577772]
+script = ExtResource("2_1bvp3")
+
+[node name="LLMManager" type="Node" parent="." unique_id=1434252775]
+script = ExtResource("3_1bvp3")
+
+[node name="TTSManager" type="Node" parent="." unique_id=833525033]
+script = ExtResource("4_7mycd")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1171922994]
+environment = SubResource("Environment_272bh")

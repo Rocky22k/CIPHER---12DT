@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="CIPHER - 12DT - Godot"
+config/name="CIPHER"
 run/main_scene="uid://bfn5cfr20tyii"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
@@ -19,6 +19,11 @@ config/icon="res://icon.svg"
 
 buses/default_bus_layout="uid://xh2gvrgp7ufe"
 driver/enable_input=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
 
 [physics]
 

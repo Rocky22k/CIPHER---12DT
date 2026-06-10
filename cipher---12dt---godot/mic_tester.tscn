@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dlvlv4yr4xyho"]
+
+[ext_resource type="Script" uid="uid://0cdabplegjix" path="res://mic_tester.gd" id="1_e4xot"]
+
+[node name="MicTester" type="Node2D" unique_id=547065002]
+script = ExtResource("1_e4xot")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=2003552440]
+autoplay = true
+bus = &"Record"
