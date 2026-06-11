@@ -8,16 +8,16 @@ var max_test_time = 3.0 # Record 3 seconds per mic
 var effect: AudioEffectRecord
 
 func _ready():
-	print("--- BEGINNING CLEAN-ROOM MIC DIAGNOSTIC ---")
+	print("-CLEANROOM MIC DIAGNOSTIC-")
 	devices = AudioServer.get_input_device_list()
 	
 	if devices.is_empty():
-		print("FATAL ERROR: No microphones found. Is audio/driver/enable_input set to true in Project Settings?")
+		print("Error- No microphones found")
 		return
 		
 	var bus_idx = AudioServer.get_bus_index("Record")
 	if bus_idx == -1:
-		print("FATAL ERROR: Record bus not found.")
+		print("err: record bus missinng")
 		return
 		
 	# Find the record effect on the bus
@@ -27,20 +27,20 @@ func _ready():
 			effect = fx
 			
 	if not effect:
-		print("FATAL ERROR: AudioEffectRecord not found on Record bus.")
+		print("err: AER not found on Record bus.")
 		return
 		
 	# Bind a fresh microphone stream
 	$AudioStreamPlayer2D.stream = AudioStreamMicrophone.new()
 	$AudioStreamPlayer2D.play()
 	
-	print("Found " + str(devices.size()) + " devices. Starting tests...")
+	print("Found " + str(devices.size()) + " devices, Starting tests...")
 	_start_next_test()
 
 func _start_next_test():
 	if current_device_index >= devices.size():
-		print("--- DIAGNOSTIC COMPLETE ---")
-		print("Check your Desktop for the .wav files!")
+		print("-COMPLETE-")
+		print("Check Desktop for the .wav files!")
 		get_tree().quit()
 		return
 		
@@ -80,12 +80,12 @@ func _save_recording():
 		
 		var err = recording.save_to_wav(file_path)
 		if err == OK:
-			print("  SUCCESS: Saved to " + file_path)
+			print(" Saved to " + file_path)
 			print("  Byte Size: " + str(recording.data.size()) + " bytes")
 		else:
-			print("  ERROR: Failed to save WAV file. Code: " + str(err))
+			print("  err: Failed WAV file. Code: " + str(err))
 	else:
-		print("  FAILURE: Godot returned empty audio data for this device.")
+		print("  err: Godot got no empty audio data for this device.")
 		
 	current_device_index += 1
 	_start_next_test()

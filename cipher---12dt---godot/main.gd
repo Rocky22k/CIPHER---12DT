@@ -26,7 +26,7 @@ var rings: Node
 var mic_dropdown: OptionButton
 
 func _ready():
-	print("--- Booting Cipher Audio Backend ---")
+	print("-Booting Cipher Audio Backend-")
 	_build_ui()
 	
 	var bus_idx = AudioServer.get_bus_index("Record")

@@ -1,6 +1,5 @@
 extends ColorRect
 
-# These match the shader's state uniform exactly.
 const IDLE = 0
 const LISTENING = 1
 const THINKING = 2
@@ -17,7 +16,7 @@ func _ready():
 	mat.set_shader_parameter("time_offset", randf() * TAU)
 
 func _process(delta):
-	# Smooth the volume so the Aura doesn't jump around
+	# Volume smoothing so the Aura dosen't jump around
 	current_volume = lerp(current_volume, target_volume, delta * 8.0)
 	mat.set_shader_parameter("volume", current_volume)
 

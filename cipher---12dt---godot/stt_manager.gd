@@ -15,7 +15,7 @@ func _ready():
 
 func send_audio(audio: AudioStreamWAV):
 	if not audio or audio.data.is_empty():
-		print("STT Error: Audio data is empty!")
+		print("STT err: Audio data is empty!")
 		transcription_failed.emit()
 		return
 
@@ -43,7 +43,7 @@ func _on_request_done(_result, response_code, _headers, body):
 	if json and json.has("text"):
 		var text = json["text"].strip_edges()
 
-		# Filter out Whisper's known silence hallucinations
+		# Filter out Whisper's silence hallucinations, do Remove LATER 
 		var lower_text = text.to_lower()
 		if lower_text == "thank you." or lower_text == "thank you" or lower_text == "thanks for watching." or lower_text.contains("amara.org"):
 			print("Whisper hallucinated silence. The microphone captured nothing.")
@@ -57,7 +57,7 @@ func _on_request_done(_result, response_code, _headers, body):
 			print("Empty transcription.")
 			transcription_failed.emit()
 	else:
-		print("STT returned unexpected format.")
+		print("STT gave unexpected format.")
 		transcription_failed.emit()
 
 func _build_multipart(wav_bytes: PackedByteArray, boundary: String) -> PackedByteArray:

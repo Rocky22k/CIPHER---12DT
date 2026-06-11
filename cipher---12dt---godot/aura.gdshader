@@ -24,14 +24,14 @@ float noise(vec2 p) {
 }
 
 void fragment() {
-    // Aspect ratio correction
+    // Aratio correction
     vec2 uv = UV;
     uv.x = (uv.x - 0.5) * aspect + 0.5;
     
     vec2 center = vec2(0.5, 0.5);
     float dist = distance(uv, center);
     
-    // Add organic wobbly distortion
+    // Add wobbly distortion
     float t = TIME * 0.5 + time_offset;
     float wobble = noise(uv * 3.0 + vec2(t, -t)) * 0.08;
     
@@ -40,7 +40,7 @@ void fragment() {
     
     float radius = base_radius;
     
-    // Rich Emission Colors
+    // Colors
     vec3 color_idle = vec3(0.3, 0.05, 0.6); // Deep Purple
     vec3 color_listen = vec3(0.0, 0.8, 0.9); // Bright Cyan
     vec3 color_think = vec3(0.05, 0.2, 0.8); // Deep Blue
