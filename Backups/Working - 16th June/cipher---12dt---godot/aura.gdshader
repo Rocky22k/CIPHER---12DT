@@ -31,14 +31,12 @@ void fragment() {
     vec2 center = vec2(0.5, 0.5);
     float dist = distance(uv, center);
     
-    // Add layered dual-octave wobbly distortion for thick plasma aesthetic
+    // Add wobbly distortion
     float t = TIME * 0.5 + time_offset;
-    float wobble1 = noise(uv * 3.0 + vec2(t, -t)) * 0.08;
-    float wobble2 = noise(uv * 6.0 - vec2(t * 1.3, t * 1.7)) * 0.04;
-    float wobble = wobble1 + wobble2;
-
+    float wobble = noise(uv * 3.0 + vec2(t, -t)) * 0.08;
+    
     float breath = sin(TIME * 0.8 + time_offset) * 0.5 + 0.5;
-    float base_radius = 0.16 + breath * 0.03 + wobble;
+    float base_radius = 0.15 + breath * 0.02 + wobble;
     
     float radius = base_radius;
     

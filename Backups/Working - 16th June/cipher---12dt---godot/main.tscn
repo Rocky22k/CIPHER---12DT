@@ -7,7 +7,6 @@
 [ext_resource type="Script" uid="uid://fj55kf3hitrv" path="res://tts_manager.gd" id="4_7mycd"]
 [ext_resource type="Shader" uid="uid://hgqfw06thfw4" path="res://aura.gdshader" id="5_7mycd"]
 [ext_resource type="Script" uid="uid://c1ufjd6qb2mwg" path="res://aura_controller.gd" id="6_272bh"]
-[ext_resource type="Script" path="res://vocal_grid.gd" id="7_vgrid"]
 
 [sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_0xm2m"]
 
@@ -33,9 +32,6 @@ bus = &"Record"
 
 [node name="RingManager" type="Node" parent="." unique_id=986854461]
 script = ExtResource("2_272bh")
-
-[node name="VocalGrid" type="Node2D" parent="." unique_id=1092837465]
-script = ExtResource("7_vgrid")
 
 [node name="Background" type="ColorRect" parent="." unique_id=1731879902]
 anchors_preset = 15
