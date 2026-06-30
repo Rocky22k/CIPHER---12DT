@@ -13,8 +13,6 @@ var current_glow = 2.5
 var target_glow = 2.5
 var active_state = 0
 var mat: ShaderMaterial
-var target_tension = 0.0
-var current_tension = 0.0
 
 func _ready():
 	mat = material
@@ -23,7 +21,6 @@ func _ready():
 	mat.set_shader_parameter("time_offset", randf() * TAU)
 	mat.set_shader_parameter("speed", 1.0)
 	mat.set_shader_parameter("glow_intensity", 2.5)
-	mat.set_shader_parameter("tension", 0.0)
 
 func _process(delta):
 	# Volume smoothing so the Aura doesn't jump around
@@ -48,12 +45,10 @@ func _process(delta):
 	# Smoothly interpolate parameters
 	current_speed = lerp(current_speed, target_speed, delta * 5.0)
 	current_glow = lerp(current_glow, target_glow, delta * 5.0)
-	current_tension = lerp(current_tension, target_tension, delta * 4.0)
 
 	# Set shader parameters
 	mat.set_shader_parameter("speed", current_speed)
 	mat.set_shader_parameter("glow_intensity", current_glow)
-	mat.set_shader_parameter("tension", current_tension)
 
 func set_volume(v: float):
 	target_volume = clamp(v, 0.0, 1.0)

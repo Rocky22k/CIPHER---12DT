@@ -5,7 +5,6 @@ uniform int state = 0; // 0=IDLE, 1=LISTENING, 2=THINKING, 3=SPEAKING
 uniform float time_offset = 0.0;
 uniform float speed = 1.0;
 uniform float glow_intensity = 2.5;
-uniform float tension : hint_range(0.0, 1.0) = 0.0;
 
 // Aspect ratio correction (16:9)
 const float aspect = 16.0 / 9.0;
@@ -50,18 +49,11 @@ void fragment() {
     vec3 color_think = vec3(0.05, 0.2, 0.8); // Deep Blue
     vec3 color_speak = vec3(1.0, 0.6, 0.1); // Warm Gold
 
-    // Blend color_idle towards tense magenta based on tension
-    vec3 color_tense = vec3(0.9, 0.05, 0.45);
-    color_idle = mix(color_idle, color_tense, tension);
-
     vec3 color = color_idle;
 
     if (state == 1) {
-        float speed_mod = 1.0 + tension * 2.0;
-        float t_fast = TIME * 0.08 * speed * speed_mod + time_offset;
-        float wobble_fast = noise(uv * 3.0 + vec2(t_fast, -t_fast)) * 0.08;
         float vol_boost = volume * 0.4;
-        radius = base_radius + vol_boost + wobble_fast * (2.0 + tension * 2.0);
+        radius = base_radius + vol_boost + wobble * 2.0;
         color = mix(color_idle, color_listen, clamp(volume * 3.0, 0.0, 1.0));
     } else if (state == 2) {
         float angle = atan(uv.y - 0.5, uv.x - 0.5);
