@@ -91,7 +91,15 @@ func _on_request_done(_result, response_code, _headers, body):
 	if json and json.has("text"):
 		var text = json["text"].strip_edges()
 
-		# Filter out Whisper's silence hallucinations, do Remove LATER 
+		# Confidence gate: if Whisper itself says no speech was likely present, discard immediately
+		if json.has("segments") and json["segments"].size() > 0:
+			var no_speech_prob = json["segments"][0].get("no_speech_prob", 0.0)
+			if no_speech_prob > 0.6:
+				print("Whisper confidence too low (no_speech_prob: %.2f). Discarding." % no_speech_prob)
+				transcription_failed.emit()
+				return
+
+		# Filter out known Whisper silence hallucination phrases
 		var lower_text = text.to_lower()
 		if lower_text == "thank you." or lower_text == "thank you" or lower_text == "thanks for watching." or lower_text.contains("amara.org"):
 			print("Whisper hallucinated silence. The microphone captured nothing.")

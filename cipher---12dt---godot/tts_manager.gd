@@ -14,10 +14,10 @@ var last_text_spoken = ""
 var retry_active = false
 
 # Voice settings (class-level so speak() and external callers can access them)
-var active_voice_id = "EXAVITQu4vr4xnSDxMaL"  # "Sarah" - calm, female voice
-var voice_stability = 0.6
-var voice_similarity_boost = 0.8
-var voice_style = 0.2
+var active_voice_id = "EXAVITQu4vr4xnSDxMaL"  # Bella — warm, natural female
+var voice_stability = 0.55
+var voice_similarity_boost = 0.75
+var voice_style = 0.15
 
 var http: HTTPRequest
 var player: AudioStreamPlayer
