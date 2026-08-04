@@ -6,7 +6,6 @@ var spawn_interval = 0.15
 var is_active = false
 var screen_center: Vector2
 var active_state = 0
-var current_wpm = 130.0
 
 func _ready():
 	screen_center = get_viewport().get_visible_rect().size / 2.0
@@ -23,7 +22,6 @@ func _process(delta):
 func start():
 	is_active = true
 	spawn_timer = spawn_interval
-	print("[RingManager] ", active_state, " rings active. Alpha-decay enabled.")
 
 func stop():
 	is_active = false
@@ -31,13 +29,8 @@ func stop():
 func set_state(s: int):
 	active_state = s
 
-func set_wpm(wpm: float):
-	current_wpm = wpm
-
 func _spawn_ring():
 	var ring = ring_scene.instantiate()
 	ring.position = screen_center
 	get_parent().add_child(ring)
 	ring.set_state_color(active_state)
-	if ring.has_method("set_wpm"):
-		ring.set_wpm(current_wpm)

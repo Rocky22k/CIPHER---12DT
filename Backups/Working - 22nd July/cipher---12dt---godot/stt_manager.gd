@@ -6,14 +6,6 @@ const GROQ_STT_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
 var http: HTTPRequest
 var filler_regex: RegEx
 
-# Feature 16: Expanded hallucination phrases list
-const HALLUCINATION_PHRASES = [
-	"thank you.", "thank you", "thanks for watching.",
-	"thanks for watching", "you", "bye.", "bye",
-	".", ",", "...", "please subscribe.",
-	"like and subscribe.", "see you next time."
-]
-
 signal transcription_ready_with_metrics(text: String, filler_count: int, wpm: float)
 signal transcription_failed()
 
@@ -60,7 +52,6 @@ func send_audio(audio: AudioStreamWAV):
 		transcription_failed.emit()
 		return
 
-	# Local amplitude gate — discards silent audio before calling API to conserve quota
 	var peak = get_max_amplitude(audio)
 	print("Audio Peak Amplitude Check: ", peak)
 	if peak < 0.005:
@@ -100,7 +91,7 @@ func _on_request_done(_result, response_code, _headers, body):
 	if json and json.has("text"):
 		var text = json["text"].strip_edges()
 
-		# Feature 3: Confidence gate (verbose_json segment no_speech_prob)
+		# Confidence gate: if Whisper itself says no speech was likely present, discard immediately
 		if json.has("segments") and json["segments"].size() > 0:
 			var no_speech_prob = json["segments"][0].get("no_speech_prob", 0.0)
 			if no_speech_prob > 0.6:
@@ -108,22 +99,19 @@ func _on_request_done(_result, response_code, _headers, body):
 				transcription_failed.emit()
 				return
 
-		# Feature 16: Expanded Whisper hallucination filter
+		# Filter out known Whisper silence hallucination phrases
 		var lower_text = text.to_lower()
-		for phrase in HALLUCINATION_PHRASES:
-			if lower_text == phrase or lower_text.begins_with(phrase + " "):
-				print("Whisper hallucinated silence: '%s'. Discarding." % text)
-				transcription_failed.emit()
-				return
-		if lower_text.contains("amara.org"):
-			print("Whisper hallucinated amara.org watermark. Discarding.")
+		if lower_text == "thank you." or lower_text == "thank you" or lower_text == "thanks for watching." or lower_text.contains("amara.org"):
+			print("Whisper hallucinated silence. The microphone captured nothing.")
 			transcription_failed.emit()
 			return
 
-		if text.length() > 1 and text.split(" ", false).size() >= 1:
+		if text.length() > 1:
+			# Count words and compute WPM
 			var word_count = text.split(" ", false).size()
 			var wpm = (float(word_count) / last_audio_duration) * 60.0
 
+			# Count filler words using RegEx
 			var matches = filler_regex.search_all(lower_text)
 			var filler_count = matches.size()
 
@@ -147,13 +135,8 @@ func _build_multipart(wav_bytes: PackedByteArray, boundary: String) -> PackedByt
 	var lang_field = "\r\n--" + boundary + "\r\nContent-Disposition: form-data; name=\"language\"\r\n\r\nen"
 	output.append_array(lang_field.to_utf8_buffer())
 
-	# Bias prompt: urges Whisper to transcribe vocal fillers (um/uh/like)
 	var prompt_field = "\r\n--" + boundary + "\r\nContent-Disposition: form-data; name=\"prompt\"\r\n\r\nUmm, let's see, uh, yes, like..."
 	output.append_array(prompt_field.to_utf8_buffer())
-
-	# Feature 3: Request verbose_json format so segments array contains no_speech_prob
-	var format_field = "\r\n--" + boundary + "\r\nContent-Disposition: form-data; name=\"response_format\"\r\n\r\nverbose_json"
-	output.append_array(format_field.to_utf8_buffer())
 
 	var close = "\r\n--" + boundary + "--\r\n"
 	output.append_array(close.to_utf8_buffer())

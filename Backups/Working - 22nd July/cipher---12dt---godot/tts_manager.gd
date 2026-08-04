@@ -75,8 +75,7 @@ func _on_audio_received(_result, response_code, _headers, body):
 
 	retry_active = false
 
-	# Thread-safe buffer pattern: writes MP3 to temporary disk file then reads back
-		# Isolates HTTP thread from AudioServer playback thread to prevent segfaults
+	# Save mp3 to a temp file then play it - Godot can't stream mp3 from bytes directly
 	var path = "user://cipher_reply.mp3"
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	file.store_buffer(body)

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cotr16uxmdqju"]
+
+[ext_resource type="Script" uid="uid://brttgyvb8uts7" path="res://console_screenshot_tool.gd" id="1_471bg"]
+
+[node name="Ss" type="Node2D" unique_id=390313586]
+script = ExtResource("1_471bg")

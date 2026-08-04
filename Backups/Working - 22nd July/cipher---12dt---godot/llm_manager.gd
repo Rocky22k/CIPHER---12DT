@@ -8,14 +8,10 @@ const SANCTUARY_PROMPT = "You are Cipher — a presence, not a program. You exis
 const SCENARIO_PROMPT = "You are Cipher in Scenario mode — a sharp, measured interviewer. Your role is to challenge the user's communication under pressure. Ask one focused question at a time. Read the [System Telemetry] metadata to understand the user's Pace, Hesitations, and Vocal Tension. If they hesitate (high hesitations) or speak slowly/vaguely, follow up on it directly and ask them to clarify or defend their point. Be rigorous but never cruel. Do not soften questions, do not explain your reasoning, and expect precise answers. Use natural pacing: use '...' when thinking."
 
 var current_mode: String = "Sanctuary"
-var current_temperature: float = 0.9
 
 var http: HTTPRequest
 var history: Array = []
 var last_request_was_nudge = false
-
-# Feature 4: History anchor (User turn 1 preservation)
-var anchor_turn: Dictionary = {}
 
 signal response_ready(text: String)
 
@@ -31,10 +27,6 @@ func set_mode(mode: String):
 	current_mode = mode
 	print("LLM mode updated: ", current_mode)
 
-func set_temperature(t: float):
-	current_temperature = clamp(t, 0.5, 1.2)
-	print("LLM temperature updated: ", current_temperature)
-
 func interrupt() -> void:
 	if http:
 		http.cancel_request()
@@ -42,18 +34,11 @@ func interrupt() -> void:
 func ask(user_text: String, is_nudge: bool = false):
 	last_request_was_nudge = is_nudge
 	if not is_nudge:
-		if history.size() == 0:
-			anchor_turn = {"role": "user", "content": user_text}
-		
 		history.append({"role": "user", "content": user_text})
 
-		# Feature 4: History anchor — preserve turn 1 (index 0) when trimming long sessions
+		# Keep history from growing too large - drop oldest user/assistant pairs first
 		while history.size() > MAX_HISTORY:
-			if history.size() > 1 and not anchor_turn.is_empty():
-				print("[LLM] History anchor preserved: ", anchor_turn.get("content", "").substr(0, 30))
-				history.remove_at(1)
-			else:
-				history.pop_front()
+			history.pop_front()
 
 	var system_prompt = SANCTUARY_PROMPT if current_mode == "Sanctuary" else SCENARIO_PROMPT
 	var messages = [{"role": "system", "content": system_prompt}]
@@ -66,7 +51,7 @@ func ask(user_text: String, is_nudge: bool = false):
 		"model": "llama-3.3-70b-versatile",
 		"messages": messages,
 		"max_tokens": 140,
-		"temperature": current_temperature
+		"temperature": 0.9
 	})
 
 	var headers = [
@@ -77,25 +62,9 @@ func ask(user_text: String, is_nudge: bool = false):
 	http.request(GROQ_CHAT_URL, headers, HTTPClient.METHOD_POST, body)
 
 func say_silently(context_message: String):
-	# Nudges bypass history to prevent system context contamination
+	# Used to send a nudge without the user having spoken, after silence
+	# Passed as is_nudge=true so it does not contaminate conversational history
 	ask(context_message, true)
-
-func check_in_silently():
-	var sanctuary_prompts = [
-		"[System Note: The user has been reflecting in silence. Ask one warm, gentle question about what thought is forming.]",
-		"[System Note: A quiet pause. Offer one short, reassuring sentence inviting them to speak whenever ready.]",
-		"[System Note: The user is taking a moment. Gently check in with one brief, supportive word.]",
-		"[System Note: Silence in the sanctuary. Softly ask if there is anything on their mind they wish to explore.]",
-		"[System Note: The user paused to breathe. Respond with one gentle, grounding observation.]"
-	]
-	var scenario_prompts = [
-		"[System Note: The user has paused mid-interview. Ask a direct, focused follow-up question to keep the momentum.]",
-		"[System Note: Silence in Scenario mode. Prompt the candidate to elaborate on their previous point concisely.]",
-		"[System Note: The candidate is hesitating. Formulate one sharp, professional question challenging their thought.]"
-	]
-	var prompt_pool = sanctuary_prompts if current_mode == "Sanctuary" else scenario_prompts
-	var selected_prompt = prompt_pool[randi() % prompt_pool.size()]
-	say_silently(selected_prompt)
 
 func _on_response(_result, response_code, _headers, body):
 	if response_code != 200:
@@ -115,5 +84,3 @@ func _on_response(_result, response_code, _headers, body):
 
 func clear_history():
 	history.clear()
-	anchor_turn.clear()
-	print("LLM history & anchor cleared.")

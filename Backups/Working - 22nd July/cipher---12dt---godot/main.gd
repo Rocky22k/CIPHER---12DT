@@ -16,7 +16,7 @@ var effect: AudioEffectRecord
 var spectrum: AudioEffectSpectrumAnalyzerInstance
 var record_timer = 0.0
 var long_silence_timer = 0.0
-var last_pitch_ratio = 1.0  # Real-time vocal pitch ratio (treble/bass)
+var last_pitch_ratio = 1.0 # Will be set by pitch analyzer in Task 5
 var accumulated_bass = 0.0
 var accumulated_treble = 0.0
 var pitch_samples = 0
@@ -39,16 +39,6 @@ var mode_indicator_label: Label
 var mic_dropdown: OptionButton
 var mode_dropdown: OptionButton
 var voice_dropdown: OptionButton
-var tts_spectrum: AudioEffectSpectrumAnalyzerInstance
-var session_utterance_count = 0
-var mic_muted = false
-var session_valence = 0.5
-var warp_strength_uniform = 0.9
-var silence_warning_seconds = 25.0
-var silence_check_in_seconds = 30.0
-var spectrum_history = []
-var last_subtitle_text: String = ""
-var last_wpm: float = 130.0
 
 func _ready():
 	print("-Booting Cipher Audio Backend-")
@@ -77,16 +67,6 @@ func _ready():
 		reverb.damping = 0.5
 		reverb.spread = 1.0
 		AudioServer.add_bus_effect(bus_count, reverb, 0)
-
-		# Feature 18: Secondary spectrum analyzer on TTS_Voice bus
-		var tts_sa = AudioEffectSpectrumAnalyzer.new()
-		AudioServer.add_bus_effect(bus_count, tts_sa, 1)
-
-	# Feature 18: Grab TTS spectrum analyzer instance
-	var tts_b_idx = AudioServer.get_bus_index("TTS_Voice")
-	if tts_b_idx != -1:
-		tts_spectrum = AudioServer.get_bus_effect_instance(tts_b_idx, 1)
-
 
 	# Spawn reactive cosmic background particles
 	var starfield = load("res://cosmic_starfield.gd").new()
@@ -215,7 +195,7 @@ func _build_ui():
 
 	# Subtitle RichTextLabel — fixed size, no layout jitter
 	subtitle_label = RichTextLabel.new()
-	subtitle_label.bbcode_enabled = true
+	subtitle_label.bbcode_enabled = false
 	subtitle_label.fit_content = false
 	subtitle_label.clip_contents = false
 	subtitle_label.scroll_active = false
@@ -476,23 +456,12 @@ func _process(delta):
 		if long_silence_timer >= SILENCE_WARNING_SECONDS and long_silence_timer < SILENCE_CHECK_IN_SECONDS:
 			var pulse = sin(Time.get_ticks_msec() * 0.005) * 0.5 + 0.5
 			aura.target_tension = pulse
-		elif long_silence_timer >= silence_check_in_seconds:
+		elif long_silence_timer >= SILENCE_CHECK_IN_SECONDS:
 			long_silence_timer = 0.0
 			aura.target_tension = 0.0
 			_cipher_checks_in()
 
 	tts.set_vocal_tension(aura.current_tension)
-
-	# Feature 18: Pulse Aura to Cipher's own voice during SPEAKING state
-	if cipher_speaking and tts_spectrum:
-		var tts_mag = tts_spectrum.get_magnitude_for_frequency_range(200, 4000).length()
-		aura.set_volume(clamp(tts_mag * 12.0, 0.0, 1.0))
-
-	# Feature 5: Pass warp_strength to background shader based on tension & valence
-	var bg = get_node_or_null("Background")
-	if bg and bg.material:
-		bg.material.set_shader_parameter("warp_strength", 0.7 + aura.current_tension * 1.1 * (1.2 - session_valence * 0.4))
-
 
 func _interrupt_cipher():
 	print("Speech Interruption triggered by PTT spacebar input.")
@@ -516,7 +485,6 @@ func _interrupt_cipher():
 	aura.set_state(LISTENING)
 
 func _show_subtitles(text: String):
-	last_subtitle_text = text
 	if subtitle_panel.modulate.a > 0.05:
 		_drift_out_subtitles(func(): _begin_typewriter(text))
 	else:
@@ -534,8 +502,7 @@ func _begin_typewriter(text: String):
 	if subtitle_tween and subtitle_tween.is_valid():
 		subtitle_tween.kill()
 	subtitle_tween = create_tween()
-	var wpm_factor = clamp(remap(last_wpm, 110.0, 160.0, 0.036, 0.020), 0.018, 0.040)
-	subtitle_tween.tween_property(subtitle_label, "visible_characters", char_count, clamp(char_count * wpm_factor, 0.6, 6.0))
+	subtitle_tween.tween_property(subtitle_label, "visible_characters", char_count, clamp(char_count * 0.028, 0.8, 6.0))
 
 func _drift_out_subtitles(on_complete: Callable):
 	if subtitle_tween and subtitle_tween.is_valid():
@@ -556,10 +523,7 @@ func _hide_subtitles():
 
 func _cipher_checks_in():
 	aura.set_state(THINKING)
-	if llm and llm.has_method("check_in_silently"):
-		llm.check_in_silently()
-	else:
-		llm.say_silently("The user has been quiet for a while. Gently check in with one short, warm sentence.")
+	llm.say_silently("The user has been quiet for a while. Gently check in with one short, warm sentence.")
 
 func _on_transcription_metrics(text: String, filler_count: int, wpm: float):
 	print("You said: " + text)
@@ -578,19 +542,6 @@ func _on_transcription_metrics(text: String, filler_count: int, wpm: float):
 	elif wpm < 110.0:
 		pace_str = "Slow"
 
-	# Feature 6 & 20: Store WPM & set adaptive LLM temperature
-	last_wpm = wpm
-	var temp = clamp(remap(wpm, 110.0, 160.0, 0.75, 1.05), 0.65, 1.15)
-	if llm and llm.has_method("set_temperature"):
-		llm.set_temperature(temp)
-
-	# Feature 13: Increment session utterance counter
-	session_utterance_count += 1
-	_update_mode_indicator()
-	print("[Session] Utterance count: ", session_utterance_count)
-
-	# Feature 14: Set ring expansion rate from WPM
-
 	var telemetry_text = "[System Telemetry: Pace: %s (%d WPM), Hesitations: %d, Vocal Tension: %s] User says: %s" % [pace_str, int(wpm), filler_count, tension_str, text]
 	print("Sending to LLM with telemetry: ", telemetry_text)
 	llm.ask(telemetry_text)
@@ -604,26 +555,6 @@ func _on_response(reply: String):
 	print("Cipher: " + reply)
 	cipher_speaking = true
 	aura.set_state(SPEAKING)
-
-	# Feature 1: Emotion-tint scanning
-	var lower_rep = reply.to_lower()
-	var tint = Vector3(0.0, 0.0, 0.0)
-	if lower_rep.contains("calm") or lower_rep.contains("peace") or lower_rep.contains("gentle"):
-		tint = Vector3(0.0, 0.8, 0.6) # Teal
-	elif lower_rep.contains("bright") or lower_rep.contains("joy") or lower_rep.contains("light"):
-		tint = Vector3(0.9, 0.7, 0.1) # Gold
-	elif lower_rep.contains("deep") or lower_rep.contains("void") or lower_rep.contains("space"):
-		tint = Vector3(0.3, 0.1, 0.8) # Deep Violet
-	elif lower_rep.contains("focus") or lower_rep.contains("sharp") or lower_rep.contains("challenge"):
-		tint = Vector3(0.9, 0.1, 0.3) # Crimson
-	if aura and aura.has_method("set_emotion_tint"):
-		aura.set_emotion_tint(tint)
-
-	# Feature 19: Emotional arc tracking
-	if lower_rep.contains("great") or lower_rep.contains("good") or lower_rep.contains("calm"):
-		session_valence = clamp(session_valence + 0.08, 0.1, 1.0)
-	elif lower_rep.contains("hard") or lower_rep.contains("stress") or lower_rep.contains("stuck"):
-		session_valence = clamp(session_valence - 0.08, 0.1, 1.0)
 
 	# Show subtitles
 	_show_subtitles(reply)
@@ -648,25 +579,13 @@ func _on_mode_selected(index: int):
 	if index == 0:
 		llm.set_mode("Sanctuary")
 		tts.set_voice_parameters(0.42, 0.75, 0.3)
-		# Feature 7: Dynamic silence threshold (Sanctuary: 30s warn, 35s check-in)
-		silence_warning_seconds = 30.0
-		silence_check_in_seconds = 35.0
-		# Feature 8: Mode shader blend
-		if aura and aura.has_method("set_mode_blend"): aura.set_mode_blend(0.0)
-		# Feature 14: Dynamic reverb preset
-		if tts and tts.has_method("set_reverb_mode"): tts.set_reverb_mode("Sanctuary")
+		if mode_indicator_label:
+			mode_indicator_label.text = "S A N C T U A R Y"
 	else:
 		llm.set_mode("Scenario")
 		tts.set_voice_parameters(0.75, 0.85, 0.1)
-		# Feature 7: Dynamic silence threshold (Scenario: 15s warn, 20s check-in)
-		silence_warning_seconds = 15.0
-		silence_check_in_seconds = 20.0
-		# Feature 8: Mode shader blend
-		if aura and aura.has_method("set_mode_blend"): aura.set_mode_blend(1.0)
-		# Feature 14: Dynamic reverb preset
-		if tts and tts.has_method("set_reverb_mode"): tts.set_reverb_mode("Scenario")
-
-	_update_mode_indicator()
+		if mode_indicator_label:
+			mode_indicator_label.text = "S C E N A R I O"
 
 	# Update the stability and similarity sliders to match the defaults for this mode
 	if settings_stab_slider and settings_stab_label:
@@ -703,8 +622,6 @@ func _reboot_mic_stream() -> void:
 		player.stream = AudioStreamMicrophone.new()
 		player.play()
 
-const SETTINGS_PASS = "CipherSanctuaryPass2026"
-
 func _save_settings() -> void:
 	var config = ConfigFile.new()
 	config.set_value("audio", "input_device", AudioServer.input_device)
@@ -714,31 +631,16 @@ func _save_settings() -> void:
 		config.set_value("session", "voice_profile", voice_dropdown.selected)
 	config.set_value("session", "voice_stability", tts.voice_stability)
 	config.set_value("session", "voice_similarity", tts.voice_similarity_boost)
-
-	# Feature 17: Multi-session memory persistence
-	if last_subtitle_text != "":
-		config.set_value("session", "last_topic", last_subtitle_text.substr(0, 60))
-
-	# Feature 5: Encrypted ConfigFile save
-	var err = config.save_encrypted_pass("user://settings.enc", SETTINGS_PASS)
+	var err = config.save("user://settings.cfg")
 	if err == OK:
-		print("[Config] Settings saved (encrypted). Path: user://settings.enc")
+		print("Settings saved successfully.")
 	else:
 		print("Failed to save settings: ", err)
 
 func _load_settings() -> void:
 	var config = ConfigFile.new()
-	# Feature 5: Encrypted ConfigFile load with plaintext migration fallback
-	var err = config.load_encrypted_pass("user://settings.enc", SETTINGS_PASS)
-	if err != OK:
-		err = config.load("user://settings.cfg")
-
+	var err = config.load("user://settings.cfg")
 	if err == OK:
-		# Feature 17: Restore multi-session memory topic
-		var last_topic = config.get_value("session", "last_topic", "")
-		if last_topic != "" and llm:
-			print("[Memory] Restored previous session topic: ", last_topic)
-			llm.say_silently("The user previously spoke about: " + last_topic)
 		var saved_device = config.get_value("audio", "input_device", "")
 		var devices = AudioServer.get_input_device_list()
 		if saved_device != "" and saved_device in devices:
@@ -777,41 +679,3 @@ func _load_settings() -> void:
 				settings_sim_label.text = "similarity  " + ("%.2f" % saved_sim)
 	else:
 		print("No settings file found, using defaults: ", AudioServer.input_device)
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and not event.echo:
-		if event.pressed:
-			if event.physical_keycode == KEY_M:
-				mic_muted = !mic_muted
-				if mic_muted:
-					if recording:
-						recording = false
-						if effect:
-							effect.set_recording_active(false)
-					aura.set_state(IDLE)
-					print("[Mute] Microphone muted. PTT disabled.")
-				else:
-					print("[Mute] Microphone unmuted. PTT restored.")
-				_update_mode_indicator()
-			elif event.physical_keycode == KEY_R and not cipher_speaking and not recording:
-				if last_subtitle_text != "":
-					if subtitle_tween and subtitle_tween.is_valid():
-						subtitle_tween.kill()
-					subtitle_panel.position.y = subtitle_base_y
-					subtitle_label.text = last_subtitle_text
-					subtitle_label.visible_characters = -1
-					subtitle_panel.modulate.a = 0.72
-					print("[Subtitle] Readback mode active.")
-		else:
-			if event.physical_keycode == KEY_R and not cipher_speaking:
-				_hide_subtitles()
-
-func _update_mode_indicator() -> void:
-	if not mode_indicator_label:
-		return
-	var base = "S A N C T U A R Y" if (mode_dropdown and mode_dropdown.selected == 0) else "S C E N A R I O"
-	if mic_muted:
-		base += "   ·   [MUTED]"
-	elif session_utterance_count > 0:
-		base += "   ·   %d" % session_utterance_count
-	mode_indicator_label.text = base
