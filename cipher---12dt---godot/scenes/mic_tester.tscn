@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://bd4awp3b37jp7"]
+[gd_scene format=3 uid="uid://dlvlv4yr4xyho"]
 
-[ext_resource type="Script" path="res://mic_tester.gd" id="1_e4xot"]
+[ext_resource type="Script" uid="uid://0cdabplegjix" path="res://scripts/mic_tester.gd" id="1_e4xot"]
 
 [node name="MicTester" type="Node2D" unique_id=547065002]
 script = ExtResource("1_e4xot")

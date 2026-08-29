@@ -1,12 +1,12 @@
-[gd_scene format=3 uid="uid://bb67k54m3ardh"]
+[gd_scene format=3 uid="uid://bfn5cfr20tyii"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_ig7tw"]
-[ext_resource type="Script" path="res://stt_manager.gd" id="2_1bvp3"]
-[ext_resource type="Script" path="res://ring_manager.gd" id="2_272bh"]
-[ext_resource type="Script" path="res://llm_manager.gd" id="3_1bvp3"]
-[ext_resource type="Script" path="res://tts_manager.gd" id="4_7mycd"]
-[ext_resource type="Shader" path="res://aura.gdshader" id="5_7mycd"]
-[ext_resource type="Script" path="res://aura_controller.gd" id="6_272bh"]
+[ext_resource type="Script" uid="uid://3wqtmbe8agvc" path="res://scripts/main.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://briw64te4xd7s" path="res://scripts/stt_manager.gd" id="2_1bvp3"]
+[ext_resource type="Script" uid="uid://bony80fljgjf0" path="res://scripts/ring_manager.gd" id="2_272bh"]
+[ext_resource type="Script" uid="uid://deiheki748r14" path="res://scripts/llm_manager.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://fj55kf3hitrv" path="res://scripts/tts_manager.gd" id="4_7mycd"]
+[ext_resource type="Shader" uid="uid://beb1mirows0gr" path="res://shaders/aura.gdshader" id="5_7mycd"]
+[ext_resource type="Script" uid="uid://c1ufjd6qb2mwg" path="res://scripts/aura_controller.gd" id="6_272bh"]
 
 [sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_0xm2m"]
 
@@ -16,7 +16,7 @@ shader_parameter/volume = 0.0
 shader_parameter/state = 0
 shader_parameter/time_offset = 0.0
 shader_parameter/speed = 1.0
-shader_parameter/glow_intensity = 2.5
+shader_parameter/glow_intensity = 2.4
 shader_parameter/tension = 0.0
 shader_parameter/resolution = Vector2(1920, 1080)
 

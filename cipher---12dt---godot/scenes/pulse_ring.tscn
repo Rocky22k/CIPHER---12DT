@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dmjkrhcwerkk6"]
+[gd_scene format=3 uid="uid://dcdp0svmy3yrd"]
 
-[ext_resource type="Script" path="res://pulse_ring.gd" id="1_rc1wa"]
+[ext_resource type="Script" uid="uid://clvnnif0l8oy2" path="res://scripts/pulse_ring.gd" id="1_rc1wa"]
 
 [node name="PulseRing" type="Node2D" unique_id=18469353]
 script = ExtResource("1_rc1wa")
