@@ -1,6 +1,6 @@
 ## CIPHER — Volumetric Aura Shader Controller
-## Smoothly interpolates muted pastel shader colors, radius, and uniforms using delta lerp.
-## Uses a non-repeating shuffle deck to guarantee that all 12 listening gradients appear randomly.
+## Smoothly interpolates shader colors, radius, and uniforms using frame-rate independent lerp.
+## Cycles across 12 distinct, vivid, unmistakable listening palettes on Spacebar Push-to-Talk.
 extends ColorRect
 
 const IDLE: int = 0
@@ -8,32 +8,33 @@ const LISTENING: int = 1
 const THINKING: int = 2
 const SPEAKING: int = 3
 
-## 12 Distinct, Vibrant Muted Pastel Gradients for Push-to-Talk (LISTENING state)
+## 12 Highly Distinct, Unmistakable Color Palettes for Push-to-Talk (LISTENING state)
+## Spans the entire color wheel: Green, Orange, Pink, Yellow, Turquoise, Coral, Lime, etc.
 const LISTENING_PALETTES: Array[Dictionary] = [
-	# 1. Bioluminescent Mint & Soft Lavender
-	{"core": Vector3(0.15, 0.90, 0.65), "halo": Vector3(0.65, 0.40, 0.85), "glow": Vector3(0.05, 0.08, 0.32)},
-	# 2. Pastel Peach-Coral & Sky Cyan
-	{"core": Vector3(0.95, 0.55, 0.45), "halo": Vector3(0.25, 0.75, 0.90), "glow": Vector3(0.20, 0.06, 0.25)},
-	# 3. Wisteria Violet & Turquoise Dew
-	{"core": Vector3(0.60, 0.35, 0.90), "halo": Vector3(0.15, 0.85, 0.75), "glow": Vector3(0.10, 0.05, 0.35)},
-	# 4. Pale Amber-Gold & Indigo Mist
-	{"core": Vector3(0.90, 0.72, 0.30), "halo": Vector3(0.35, 0.45, 0.85), "glow": Vector3(0.15, 0.08, 0.28)},
-	# 5. Rose Quartz & Seafoam Green
-	{"core": Vector3(0.90, 0.45, 0.65), "halo": Vector3(0.20, 0.85, 0.65), "glow": Vector3(0.18, 0.05, 0.22)},
-	# 6. Electric Aqua & Soft Plum
-	{"core": Vector3(0.10, 0.88, 0.95), "halo": Vector3(0.75, 0.30, 0.70), "glow": Vector3(0.04, 0.12, 0.36)},
-	# 7. Matcha Sage & Soft Lilac
-	{"core": Vector3(0.45, 0.82, 0.50), "halo": Vector3(0.70, 0.45, 0.85), "glow": Vector3(0.08, 0.14, 0.25)},
-	# 8. Arctic Frost Blue & Sunset Coral
-	{"core": Vector3(0.30, 0.75, 0.95), "halo": Vector3(0.90, 0.50, 0.45), "glow": Vector3(0.06, 0.08, 0.30)},
-	# 9. Dusty Orchid & Emerald Dew
-	{"core": Vector3(0.80, 0.40, 0.85), "halo": Vector3(0.10, 0.85, 0.55), "glow": Vector3(0.18, 0.04, 0.28)},
-	# 10. Apricot Champagne & Ocean Teal
-	{"core": Vector3(0.95, 0.65, 0.35), "halo": Vector3(0.15, 0.75, 0.75), "glow": Vector3(0.20, 0.10, 0.15)},
-	# 11. Periwinkle Twilight & Mint Frost
-	{"core": Vector3(0.50, 0.55, 0.95), "halo": Vector3(0.25, 0.85, 0.65), "glow": Vector3(0.08, 0.08, 0.35)},
-	# 12. Prismatic Cyan & Rose-Lavender
-	{"core": Vector3(0.10, 0.92, 0.85), "halo": Vector3(0.85, 0.45, 0.75), "glow": Vector3(0.05, 0.10, 0.32)}
+	# 1. Radiant Emerald & Sun Gold
+	{"core": Vector3(0.10, 0.95, 0.45), "halo": Vector3(0.95, 0.85, 0.20), "glow": Vector3(0.02, 0.20, 0.05)},
+	# 2. Vibrant Sunset Orange & Coral
+	{"core": Vector3(1.00, 0.55, 0.10), "halo": Vector3(0.95, 0.25, 0.35), "glow": Vector3(0.22, 0.06, 0.02)},
+	# 3. Electric Turquoise & Sky Aquamarine
+	{"core": Vector3(0.05, 0.92, 0.95), "halo": Vector3(0.20, 0.65, 0.95), "glow": Vector3(0.01, 0.15, 0.22)},
+	# 4. Ruby Rose & Hot Pink
+	{"core": Vector3(0.95, 0.20, 0.55), "halo": Vector3(1.00, 0.50, 0.70), "glow": Vector3(0.25, 0.03, 0.08)},
+	# 5. Neon Lime & Forest Jade
+	{"core": Vector3(0.65, 0.98, 0.15), "halo": Vector3(0.15, 0.85, 0.55), "glow": Vector3(0.08, 0.22, 0.02)},
+	# 6. Canary Gold & Warm Amber
+	{"core": Vector3(1.00, 0.85, 0.15), "halo": Vector3(0.95, 0.55, 0.10), "glow": Vector3(0.22, 0.15, 0.02)},
+	# 7. Mint Ice & Seafoam Dew
+	{"core": Vector3(0.15, 0.95, 0.70), "halo": Vector3(0.45, 0.90, 0.85), "glow": Vector3(0.02, 0.18, 0.10)},
+	# 8. Peach Blossom & Apricot Glow
+	{"core": Vector3(0.98, 0.60, 0.45), "halo": Vector3(0.95, 0.80, 0.30), "glow": Vector3(0.20, 0.08, 0.03)},
+	# 9. Vivid Orchid & Magenta Fire
+	{"core": Vector3(0.85, 0.25, 0.90), "halo": Vector3(0.95, 0.45, 0.60), "glow": Vector3(0.20, 0.03, 0.18)},
+	# 10. Arctic Ice Blue & Pure White Glow
+	{"core": Vector3(0.35, 0.75, 1.00), "halo": Vector3(0.75, 0.90, 0.98), "glow": Vector3(0.04, 0.10, 0.25)},
+	# 11. Crimson Velvet & Spiced Copper
+	{"core": Vector3(0.95, 0.22, 0.18), "halo": Vector3(0.95, 0.60, 0.25), "glow": Vector3(0.22, 0.03, 0.02)},
+	# 12. Chartreuse & Emerald Glow
+	{"core": Vector3(0.80, 0.95, 0.18), "halo": Vector3(0.20, 0.90, 0.65), "glow": Vector3(0.12, 0.20, 0.03)}
 ]
 
 # Current interpolated state properties (Muted pastel defaults)
@@ -129,15 +130,19 @@ func _update_targets_for_state(s: int) -> void:
 			target_speed = 0.25
 			target_glow = 1.85
 		LISTENING:
-			# Guaranteed random selection from the 12-palette shuffle deck
+			# Guaranteed random selection from the 12 distinct palettes
 			var pal: Dictionary = _get_next_listening_palette()
 			target_color_core = pal["core"]
 			target_color_halo = pal["halo"]
 			target_color_glow = pal["glow"]
 			target_radius = 0.65
 			target_orbit_speed = 1.6
-			target_speed = 0.40
-			target_glow = 2.05
+			target_speed = 0.45
+			target_glow = 2.10
+			# Fast-snap initial blend so the color change is instantly visible upon Spacebar press
+			current_color_core = current_color_core.lerp(target_color_core, 0.65)
+			current_color_halo = current_color_halo.lerp(target_color_halo, 0.65)
+			current_color_glow = current_color_glow.lerp(target_color_glow, 0.65)
 		THINKING:
 			# Deep Smoky Indigo Singularity with Muted Plum Halo
 			target_color_core = Vector3(0.18, 0.30, 0.68)
@@ -161,12 +166,12 @@ func _process(delta: float) -> void:
 	if not mat:
 		return
 
-	# Smooth gradual color and radius blending across state transitions
-	current_color_core = current_color_core.lerp(target_color_core, delta * 3.5)
-	current_color_halo = current_color_halo.lerp(target_color_halo, delta * 3.5)
-	current_color_glow = current_color_glow.lerp(target_color_glow, delta * 3.5)
-	current_radius = lerp(current_radius, target_radius, delta * 3.5)
-	current_orbit_speed = lerp(current_orbit_speed, target_orbit_speed, delta * 3.5)
+	# Smooth color and radius interpolation across state transitions
+	current_color_core = current_color_core.lerp(target_color_core, delta * 5.0)
+	current_color_halo = current_color_halo.lerp(target_color_halo, delta * 5.0)
+	current_color_glow = current_color_glow.lerp(target_color_glow, delta * 5.0)
+	current_radius = lerp(current_radius, target_radius, delta * 4.0)
+	current_orbit_speed = lerp(current_orbit_speed, target_orbit_speed, delta * 4.0)
 
 	# Smooth volume damping (reacts naturally to voice without harsh spikes)
 	current_volume = lerp(current_volume, target_volume, delta * 4.0)
