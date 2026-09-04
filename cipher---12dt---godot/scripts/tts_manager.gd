@@ -1,4 +1,4 @@
-## CIPHER — Text-to-Speech (TTS) Manager
+## CIPHER - Text-to-Speech (TTS) Manager
 ## Coordinates real-time speech synthesis via ElevenLabs v3 REST API.
 ## Implements multi-key failover rotation, memory-safe MP3 decoding, and dynamic reverb modulation.
 extends Node
@@ -16,7 +16,7 @@ var current_key_idx: int = 0
 var last_text_spoken: String = ""
 var key_attempts_count: int = 0
 
-## Voice parameters (Bella — warm, natural female profile default)
+## Voice parameters (Bella - warm, natural female profile default)
 var active_voice_id: String = "EXAVITQu4vr4xnSDxMaL"
 var voice_stability: float = 0.55
 var voice_similarity_boost: float = 0.75

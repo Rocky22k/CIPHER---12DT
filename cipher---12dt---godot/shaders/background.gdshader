@@ -1,7 +1,7 @@
 shader_type canvas_item;
 
 // =============================================================================
-// CIPHER — Continuous Cyclical Aurora Flow Background Shader
+// CIPHER - Continuous Cyclical Aurora Flow Background Shader
 // Harmonized with the central living orb's cosmic palette.
 // Cascades from the Top-Right cluster across the Top-Left and Center,
 // continuously circulating toward the Bottom-Left and looping seamlessly.

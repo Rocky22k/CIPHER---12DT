@@ -1,4 +1,4 @@
-## CIPHER — Harmonic Pulse Ring Manager
+## CIPHER - Harmonic Pulse Ring Manager
 ## Spawns subtle state-reactive acoustic pulse rings during voice events.
 extends Node
 

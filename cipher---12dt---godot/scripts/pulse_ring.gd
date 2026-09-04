@@ -17,13 +17,13 @@ func set_wpm(wpm: float):
 
 func set_state_color(state: int):
 	match state:
-		1: # LISTENING — cyan-teal
+		1: # LISTENING - cyan-teal
 			ring.default_color = Color(0.1, 0.85, 0.95, 0.35)
-		3: # SPEAKING — warm gold
+		3: # SPEAKING - warm gold
 			ring.default_color = Color(1.0, 0.72, 0.2, 0.30)
-		2: # THINKING — sapphire
+		2: # THINKING - sapphire
 			ring.default_color = Color(0.15, 0.35, 0.92, 0.30)
-		_: # IDLE — soft violet
+		_: # IDLE - soft violet
 			ring.default_color = Color(0.55, 0.25, 0.85, 0.25)
 
 func _process(delta):

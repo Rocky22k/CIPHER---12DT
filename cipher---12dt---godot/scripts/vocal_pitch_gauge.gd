@@ -1,5 +1,5 @@
 extends Node2D
-# CIPHER: Real-time vocal pitch gauge — 120-degree arc at bottom-right
+# CIPHER: Real-time vocal pitch gauge - 120-degree arc at bottom-right
 # Reads treble/bass ratio from parent main.gd spectrum instance.
 
 @onready var main_node = get_parent()
@@ -32,7 +32,7 @@ func _draw():
 	var track_color = Color(0.18, 0.14, 0.28, 0.30)
 	_draw_arc_line(center, ARC_RADIUS, ARC_START_ANGLE, ARC_START_ANGLE + ARC_DEGREES, track_color, 2.0)
 
-	# Fill arc — length proportional to smoothed_ratio
+	# Fill arc - length proportional to smoothed_ratio
 	var fill_degrees = smoothed_ratio * ARC_DEGREES
 	# Color shifts: bass = indigo (calm), treble = magenta (tense)
 	var fill_color = Color(0.28, 0.04, 0.62, 0.75).lerp(Color(0.88, 0.06, 0.48, 0.85), smoothed_ratio)

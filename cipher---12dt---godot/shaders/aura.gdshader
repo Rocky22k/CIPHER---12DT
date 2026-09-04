@@ -1,7 +1,7 @@
 shader_type canvas_item;
 
 // =============================================================================
-// CIPHER — Sentient Volumetric Living Orb Fragment Shader
+// CIPHER - Sentient Volumetric Living Orb Fragment Shader
 // Inspired by the React Bits <Orb /> WebGL component.
 // Features 3D Simplex noise, inverse-square volumetric light attenuation,
 // continuous orbiting photon highlight, and smooth interpolated color blending.

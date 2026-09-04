@@ -1,4 +1,4 @@
-## CIPHER — Speech-to-Text (STT) Manager
+## CIPHER - Speech-to-Text (STT) Manager
 ## Handles microphone audio capture, local amplitude noise-gating, WAV formatting,
 ## and multipart HTTP streaming to Groq Whisper STT API with hallucination filtering.
 extends Node

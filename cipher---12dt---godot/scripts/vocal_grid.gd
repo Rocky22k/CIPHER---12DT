@@ -1,4 +1,4 @@
-## CIPHER — Vocal Grid Sine Wave Displacement Layer
+## CIPHER - Vocal Grid Sine Wave Displacement Layer
 ## Generates a reactive background coordinate lattice that displaces dynamically
 ## based on multi-band audio spectrum frequencies (bass displacement, treble speed modulation).
 extends Node2D

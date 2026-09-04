@@ -1,4 +1,4 @@
-## CIPHER — Parallax Chromatic Deep Starfield
+## CIPHER - Parallax Chromatic Deep Starfield
 ## Generates a multi-layered parallax starfield with realistic stellar color temperatures,
 ## gentle volume-reactive gravitational drift, and subtle diffraction flares.
 extends Node2D

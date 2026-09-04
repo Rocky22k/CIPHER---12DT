@@ -1,4 +1,4 @@
-## CIPHER — Diagnostic Console Test & Screenshot Tool
+## CIPHER - Diagnostic Console Test & Screenshot Tool
 ## Standalone utility scene to output labeled test execution blocks for assessment documentation.
 extends Node2D
 
@@ -26,7 +26,7 @@ func _run_component_1_tests() -> void:
 	print("  - Status: FAILED (Identified Godot engine volume mute limitation)\n")
 	print("Technique 2: MuteBus Spectrum Analyzer")
 	print("  - Input: AudioEffectSpectrumAnalyzerInstance attached to -80dB MuteBus")
-	print("  - Frequency Range: 20 Hz – 20,000 Hz magnitude extraction")
+	print("  - Frequency Range: 20 Hz - 20,000 Hz magnitude extraction")
 	print("  - Live Magnitude: 0.042 (Clean 0.0 to 1.0 normalized value)")
 	print("  - Status: PASS (Selected for real-time vocal tension calculation)\n")
 
@@ -39,7 +39,7 @@ func _run_component_2_tests() -> void:
 	print("Technique 2: Native Godot WAV Disk Buffer (audio.save_to_wav)")
 	print("  - Input: AudioStreamWAV buffer -> user://stt_temp_audio.wav")
 	print("  - Network: Multipart HTTP POST to Groq Whisper endpoint")
-	print("  - Result: HTTP 200 OK — Transcription: 'Hello, this is a test.'")
+	print("  - Result: HTTP 200 OK - Transcription: 'Hello, this is a test.'")
 	print("  - Status: PASS (100% compliant WAV headers & sub-second latency)\n")
 
 func _run_component_3_tests() -> void:

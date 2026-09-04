@@ -1,4 +1,4 @@
-## CIPHER — Volumetric Aura Shader Controller
+## CIPHER - Volumetric Aura Shader Controller
 ## Smoothly interpolates shader colors, radius, and uniforms using frame-rate independent lerp.
 ## Cycles across 12 distinct, vivid, unmistakable listening palettes on Spacebar Push-to-Talk.
 extends ColorRect

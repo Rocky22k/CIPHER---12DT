@@ -1,4 +1,4 @@
-## CIPHER — Main Architecture Coordinator & Audio-Visual Engine
+## CIPHER - Main Architecture Coordinator & Audio-Visual Engine
 ## Coordinates the bio-reactive pipeline: STT Audio Gating -> Groq LLM -> ElevenLabs TTS
 ## Manages state synchronization, dynamic audio bus routing, and UI presentation.
 extends Node
